@@ -1,10 +1,20 @@
 <script lang="ts">
-import { ref, computed, watch, useId, onMounted, onUnmounted } from "vue";
+import { ref, watch, useId, onMounted, onUnmounted } from "vue";
 import { inBrowser } from "vitepress";
 import options from "virtual:outline-depth-plugin-options";
+import { saveLocalStorage, loadLocalStorage } from "../composables/local-storage.js";
 
 const depth = ref(options.default!.depth);
 const autoExpand = ref(options.default!.autoExpand);
+type Configs = NonNullable<typeof options.default>;
+const LOCAL_STORAGE_KEY = "vitepress-outline-depth";
+{
+	const configs = loadLocalStorage<Configs>(LOCAL_STORAGE_KEY);
+	if (configs) {
+		depth.value = configs.depth;
+		autoExpand.value = configs.autoExpand;
+	}
+}
 
 watch(
 	[depth, autoExpand],
@@ -12,6 +22,7 @@ watch(
 		if (!inBrowser) return;
 		document.body.style.setProperty("--outline-depth", String(depth));
 		document.body.style.setProperty("--outline-auto-expand", String(autoExpand));
+		saveLocalStorage(LOCAL_STORAGE_KEY, { depth, autoExpand });
 	},
 	{ immediate: true },
 );
