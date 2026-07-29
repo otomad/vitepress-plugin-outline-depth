@@ -16,22 +16,27 @@ export default defineConfig({
 	build: {
 		// 关键：指定打包产物输出目录，避免覆盖 vitepress 的 dist
 		outDir: "dist",
+		// 1. 禁用代码压缩，保持可读性
+		minify: false,
+		// 2. 必须关闭 cssCodeSplit，否则多模块模式下样式可能无法正确提取
+		cssCodeSplit: false,
 		// 开启库模式
 		lib: {
 			// 绝对路径指向你的插件入口，而不是文档
 			entry: resolve(__dirname, "src/index.ts"),
-			name: "MyVitePressPlugin",
-			fileName: format => `index.${format}.js`,
-			formats: ["es", "cjs"], // 提供 ESM 和 CommonJS 两种格式
+			formats: ["es"], // 提供 ESM 和 CommonJS 两种格式
 		},
 		rolldownOptions: {
-			// 🌟 极端重要：必须把 vitepress 和 vue 外部化，不要打包进你的插件里
-			external: ["vue", "vitepress"],
+			// 3. 极端重要：必须把所有 node 模块、vue 和 vitepress 设为外部依赖
+			external: id =>
+				id.includes("node_modules") ||
+				id.startsWith("node:") ||
+				["vue", "vitepress", "fs", "path"].includes(id),
 			output: {
-				globals: {
-					vue: "Vue",
-					vitepress: "VitePress",
-				},
+				preserveModules: true, // 🌟 保持原有的目录结构
+				preserveModulesRoot: "src", // 🌟 以 src 目录作为根结构
+				entryFileNames: "[name].js", // 🌟 保持原文件名，.vue 也会变成 .vue.js 或 .js
+				assetFileNames: "[name].[ext]",
 			},
 		},
 	},
