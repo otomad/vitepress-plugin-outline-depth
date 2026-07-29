@@ -9,8 +9,8 @@ watch(
 	[depth, autoExpand],
 	([depth, autoExpand]) => {
 		if (!inBrowser) return;
-		document.body.style.setProperty("--outline-depth", depth);
-		document.body.style.setProperty("--outline-auto-expand", autoExpand);
+		document.body.style.setProperty("--outline-depth", String(depth));
+		document.body.style.setProperty("--outline-auto-expand", String(autoExpand));
 	},
 	{ immediate: true },
 );
@@ -19,16 +19,17 @@ watch(
 <script setup lang="ts">
 import VPSwitch from "./Switch.vue";
 import Slider from "./Slider.vue";
-import { useI18n } from "@vp/use-i18n";
+// import { useI18n } from "@vp/use-i18n";
 
-const t = useI18n();
+// const t = useI18n();
 const id = useId();
-const depthLabel = t({ en: "Outline depth", zh: "目录层级" });
-const autoExpandLabel = t({ en: "Auto expand", zh: "自动展开" });
+// const depthLabel = t({ en: "Outline depth", zh: "目录层级" });
+// const autoExpandLabel = t({ en: "Auto expand", zh: "自动展开" });
+const depthLabel = "Outline depth"; // t({ en: "Outline depth", zh: "目录层级" });
+const autoExpandLabel = "Auto expand"; // t({ en: "Auto expand", zh: "自动展开" });
 
 const outlineMarker = ref<HTMLDivElement>();
 const observer = ref<MutationObserver>();
-const navHeight = 64;
 
 onMounted(() => {
 	outlineMarker.value = document.querySelector<HTMLDivElement>(".outline-marker")!;
