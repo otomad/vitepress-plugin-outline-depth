@@ -1,4 +1,4 @@
 declare module "virtual:outline-depth-plugin-options" {
-	import { OutlineDepthPluginOptions } from "./types";
+	const OutlineDepthPluginOptions: import("./types.ts").OutlineDepthPluginOptions;
 	export default OutlineDepthPluginOptions;
 }

@@ -10,7 +10,13 @@ const resolvedVirtualModuleId = `\0${virtualModuleId}`;
 
 const slots = ["aside-outline-before"];
 
-export function outlineDepthPlugin(options?: OutlineDepthPluginOptions): PluginOption {
+export default function outlineDepthPlugin(options: OutlineDepthPluginOptions = {}): PluginOption {
+	options.default ??= {};
+	options.locales ??= {};
+	options.saveToLocalStorage = true;
+	options.default.depth = 2;
+	options.default.autoExpand = true;
+
 	return {
 		name: "vitepress-plugin-outline-depth",
 		enforce: "pre",

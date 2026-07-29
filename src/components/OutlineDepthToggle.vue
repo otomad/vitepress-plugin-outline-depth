@@ -1,9 +1,10 @@
 <script lang="ts">
 import { ref, computed, watch, useId, onMounted, onUnmounted } from "vue";
 import { inBrowser } from "vitepress";
+import options from "virtual:outline-depth-plugin-options";
 
-const depth = ref(2);
-const autoExpand = ref(true);
+const depth = ref(options.default!.depth);
+const autoExpand = ref(options.default!.autoExpand);
 
 watch(
 	[depth, autoExpand],
@@ -19,14 +20,12 @@ watch(
 <script setup lang="ts">
 import VPSwitch from "./Switch.vue";
 import Slider from "./Slider.vue";
-// import { useI18n } from "@vp/use-i18n";
+import { useI18n } from "../composables/i18n.js";
 
-// const t = useI18n();
+const t = useI18n();
 const id = useId();
-// const depthLabel = t({ en: "Outline depth", zh: "目录层级" });
-// const autoExpandLabel = t({ en: "Auto expand", zh: "自动展开" });
-const depthLabel = "Outline depth"; // t({ en: "Outline depth", zh: "目录层级" });
-const autoExpandLabel = "Auto expand"; // t({ en: "Auto expand", zh: "自动展开" });
+const depthLabel = t({ en: "Outline depth", zh: "目录层级" });
+const autoExpandLabel = t({ en: "Auto expand", zh: "自动展开" });
 
 const outlineMarker = ref<HTMLDivElement>();
 const observer = ref<MutationObserver>();
