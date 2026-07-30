@@ -1,4 +1,4 @@
-export type AllAvailableDepthValue = 2 | 3 | 4 | 5 | 6;
+export type AvailableDepthValue = 2 | 3 | 4 | 5 | 6;
 
 export interface OutlineDepthPluginOptions {
 	/**
@@ -6,7 +6,7 @@ export interface OutlineDepthPluginOptions {
 	 *
 	 * @default 2
 	 */
-	defaultDepth?: AllAvailableDepthValue;
+	defaultDepth?: AvailableDepthValue;
 	/**
 	 * Set the default value of the Auto Expand.
 	 *
@@ -52,13 +52,13 @@ export interface OutlineDepthPluginOptions {
 	 *
 	 * @default 2
 	 */
-	minDepth?: AllAvailableDepthValue;
+	minDepth?: AvailableDepthValue;
 	/**
 	 * Set the maximum value of the Outline Depth can be set.
 	 *
 	 * @default 6
 	 */
-	maxDepth?: AllAvailableDepthValue;
+	maxDepth?: AvailableDepthValue;
 	/**
 	 * Stick the Outline Depth Toggle component at the top of the outline aside.
 	 *
@@ -77,7 +77,7 @@ export interface OutlineDepthLocalStorageConfigs {
 	/**
 	 * Set the value of the Outline Depth.
 	 */
-	depth: AllAvailableDepthValue;
+	depth: AvailableDepthValue;
 	/**
 	 * Set the value of the Auto Expand.
 	 */

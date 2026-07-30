@@ -1,6 +1,6 @@
 import type { PluginOption } from "vite";
 import { clamp } from "./composables/math.js";
-import type { OutlineDepthPluginOptions, AllAvailableDepthValue } from "./types.js";
+import type { OutlineDepthPluginOptions, AvailableDepthValue } from "./types.js";
 
 const componentName = "OutlineDepthToggle";
 const componentFile = `${componentName}.vue`;
@@ -27,7 +27,7 @@ export default function outlineDepthPlugin(options: OutlineDepthPluginOptions = 
 Current values:
 - \`minDepth\`: ${options.minDepth}
 - \`maxDepth\`: ${options.maxDepth}`);
-	options.defaultDepth = clamp(options.defaultDepth, options.minDepth, options.maxDepth) as AllAvailableDepthValue;
+	options.defaultDepth = clamp(options.defaultDepth, options.minDepth, options.maxDepth) as AvailableDepthValue;
 
 	return {
 		name: pluginName,
