@@ -1,19 +1,18 @@
+export type AllAvailableDepthValue = 2 | 3 | 4 | 5 | 6;
+
 export interface OutlineDepthPluginOptions {
 	/**
-	 * Set the default value for options.
+	 * Set the default value of the Outline Depth.
+	 *
+	 * @default 2
 	 */
-	default?: {
-		/**
-		 * Specify the default value of Outline Depth.
-		 * @default 2
-		 */
-		depth?: 2 | 3 | 4 | 5 | 6;
-		/**
-		 * Specify the default value of Auto Expand.
-		 * @default true
-		 */
-		autoExpand?: boolean;
-	};
+	defaultDepth?: AllAvailableDepthValue;
+	/**
+	 * Set the default value of the Auto Expand.
+	 *
+	 * @default true
+	 */
+	defaultAutoExpand?: boolean;
 	/**
 	 * Localize the labels.
 	 */
@@ -21,7 +20,8 @@ export interface OutlineDepthPluginOptions {
 		string,
 		{
 			/**
-			 * Specify the localized label text for Outline Depth.
+			 * Specify the localized label text for the Outline Depth.
+			 *
 			 * @default
 			 * ```markdown
 			 * - en: Outline depth
@@ -30,7 +30,8 @@ export interface OutlineDepthPluginOptions {
 			 */
 			depth: string;
 			/**
-			 * Specify the localized label text for Auto Expand.
+			 * Specify the localized label text for the Auto Expand.
+			 *
 			 * @default
 			 * ```markdown
 			 * - en: Auto expand
@@ -42,7 +43,43 @@ export interface OutlineDepthPluginOptions {
 	>;
 	/**
 	 * Save the config to local storage.
+	 *
 	 * @default true
 	 */
 	saveToLocalStorage?: boolean;
+	/**
+	 * Set the minimum value of the Outline Depth can be set.
+	 *
+	 * @default 2
+	 */
+	minDepth?: AllAvailableDepthValue;
+	/**
+	 * Set the maximum value of the Outline Depth can be set.
+	 *
+	 * @default 6
+	 */
+	maxDepth?: AllAvailableDepthValue;
+	/**
+	 * Stick the Outline Depth Toggle component at the top of the outline aside.
+	 *
+	 * @default true
+	 */
+	stickAtTop?: boolean;
+	/**
+	 * Automatically scroll the outline active outline link (or outline marker) into view when scrolling.
+	 *
+	 * @default true
+	 */
+	scrollActiveOutlineLinkIntoView?: boolean;
+}
+
+export interface OutlineDepthLocalStorageConfigs {
+	/**
+	 * Set the value of the Outline Depth.
+	 */
+	depth: AllAvailableDepthValue;
+	/**
+	 * Set the value of the Auto Expand.
+	 */
+	autoExpand: boolean;
 }

@@ -1,24 +1,36 @@
 import type { PluginOption } from "vite";
-import type { OutlineDepthPluginOptions } from "./types.js";
+import { clamp } from "./composables/math.js";
+import type { OutlineDepthPluginOptions, AllAvailableDepthValue } from "./types.js";
 
 const componentName = "OutlineDepthToggle";
 const componentFile = `${componentName}.vue`;
 const aliasComponentFile = `${import.meta.dirname}/components/${componentFile}`;
 
+const pluginName = "vitepress-plugin-outline-depth";
 const virtualModuleId = "virtual:outline-depth-plugin-options";
 const resolvedVirtualModuleId = `\0${virtualModuleId}`;
 
 const slots = ["aside-outline-before"];
 
 export default function outlineDepthPlugin(options: OutlineDepthPluginOptions = {}): PluginOption {
-	options.default ??= {};
+	options.defaultDepth ??= 2;
+	options.defaultAutoExpand ??= true;
+	options.minDepth ??= 2;
+	options.maxDepth ??= 6;
 	options.locales ??= {};
-	options.saveToLocalStorage = true;
-	options.default.depth = 2;
-	options.default.autoExpand = true;
+	options.saveToLocalStorage ??= true;
+	options.stickAtTop ??= true;
+	options.scrollActiveOutlineLinkIntoView ??= true;
+	if (options.maxDepth <= options.minDepth)
+		throw new RangeError(`\`${pluginName}\` Options Error.
+\`maxDepth\` cannot less than or equal to \`minDepth\`\n
+Current values:
+- \`minDepth\`: ${options.minDepth}
+- \`maxDepth\`: ${options.maxDepth}`);
+	options.defaultDepth = clamp(options.defaultDepth, options.minDepth, options.maxDepth) as AllAvailableDepthValue;
 
 	return {
-		name: "vitepress-plugin-outline-depth",
+		name: pluginName,
 		enforce: "pre",
 		config: () => {
 			return {
