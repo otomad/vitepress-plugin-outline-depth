@@ -1,91 +1,75 @@
 <script setup lang="ts">
 import { computed } from "vue";
+
+const props = withDefaults(
+	defineProps<{
+		min?: number;
+		max?: number;
+		step?: number;
+	}>(),
+	{
+		min: 0,
+		max: 100,
+		step: 1,
+	},
+);
+
 const value = defineModel<number>({ default: 0 });
-const valueString = computed({
-	get: () => value.value.toString(),
-	set: v => (value.value = Number(v)),
-});
 </script>
 
 <template>
-	<!-- See: https://juejin.cn/post/7269786623813615668 -->
-	<input type="range" v-model="valueString" />
+	<div
+		role="slider"
+		class="slider"
+		:aria-valuemin="min"
+		:aria-valuemax="max"
+		:aria-valuenow="value"
+		:style="{ '--value': value }"
+	>
+		<div class="track"></div>
+		<div class="thumb"></div>
+	</div>
 </template>
 
 <style lang="css" scoped>
-input {
-	--gap: 0.001px;
-	--line-thickness: 2px;
+.slider {
 	--thumb-size: 20px;
+	--track-thickness: 1px;
 
-	height: var(--thumb-size); /* needed for Firefox */
-	--active-color: var(--vp-c-brand-3);
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	background: none;
+	position: relative;
+	inline-size: 100%;
+	block-size: var(--thumb-size);
+	align-content: center;
 	cursor: pointer;
-	overflow: hidden;
+}
+
+.track {
+	inline-size: 100%;
+	block-size: var(--track-thickness);
+	margin-block: auto;
 	border-radius: calc(infinity * 1px);
-	margin: 1px;
+	background-color: var(--vp-input-border-color);
 }
-input:focus-visible,
-input:hover {
-	--active-color: var(--vp-c-brand-1);
+
+.thumb {
+	position: absolute;
+	inline-size: var(--thumb-size);
+	block-size: var(--thumb-size);
+	border-radius: 100%;
+	background-color: var(--vp-c-neutral-inverse);
+	border: 1px solid var(--vp-c-gutter);
+	box-shadow: var(--vp-shadow-1);
+	inset-block-start: 0;
+	transition: 250ms;
+	transition-property: background-color, border;
 }
-input:active,
-input:focus-visible {
-	--spread-radius: var(--thumb-size);
+
+.slider:active .thumb,
+.thumb:is(:hover, :active) {
+	border-color: var(--vp-c-brand-1);
 }
-/* Chromium */
-input[type="range" i]::-webkit-slider-thumb {
-	height: var(--thumb-size);
-	aspect-ratio: 1;
-	border-radius: 50%;
-	box-shadow: 0 0 0 var(--spread-radius, var(--line-thickness)) inset var(--active-color);
-	border-image: linear-gradient(90deg, var(--active-color) 50%, var(--vp-c-border) 0) 1/0 100vw/0
-		calc(100vw + var(--gap));
-	clip-path: polygon(
-		0 calc(50% + var(--line-thickness) / 2),
-		-100vw calc(50% + var(--line-thickness) / 2),
-		-100vw calc(50% - var(--line-thickness) / 2),
-		0 calc(50% - var(--line-thickness) / 2),
-		0 0,
-		100% 0,
-		100% calc(50% - var(--line-thickness) / 2),
-		100vw calc(50% - var(--line-thickness) / 2),
-		100vw calc(50% + var(--line-thickness) / 2),
-		100% calc(50% + var(--line-thickness) / 2),
-		100% 100%,
-		0 100%
-	);
-	appearance: none;
-	transition: 0.3s;
-}
-/* Firefox */
-input[type="range"]::-moz-range-thumb {
-	height: var(--thumb-size);
-	width: var(--thumb-size);
-	background: none;
-	border-radius: 50%;
-	box-shadow: 0 0 0 var(--spread-radius, var(--line-thickness)) inset var(--active-color);
-	border-image: linear-gradient(90deg, var(--active-color) 50%, var(--vp-c-border) 0) 1/0 100vw/0
-		calc(100vw + var(--gap));
-	clip-path: polygon(
-		0 calc(50% + var(--line-thickness) / 2),
-		-100vw calc(50% + var(--line-thickness) / 2),
-		-100vw calc(50% - var(--line-thickness) / 2),
-		0 calc(50% - var(--line-thickness) / 2),
-		0 0,
-		100% 0,
-		100% calc(50% - var(--line-thickness) / 2),
-		100vw calc(50% - var(--line-thickness) / 2),
-		100vw calc(50% + var(--line-thickness) / 2),
-		100% calc(50% + var(--line-thickness) / 2),
-		100% 100%,
-		0 100%
-	);
-	appearance: none;
-	transition: 0.3s;
+
+.slider:active .thumb {
+	background-color: var(--vp-c-bg-soft);
 }
 </style>

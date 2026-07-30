@@ -55,7 +55,7 @@ onUnmounted(() => {
 <template>
 	<div class="outline-depth-toggle">
 		<label :for="`${id}-depth`">{{ locales.depth }}</label>
-		<Slider :id="`${id}-depth`" min="2" max="6" step="1" v-model="depth" />
+		<Slider :id="`${id}-depth`" :min="2" :max="6" :step="1" v-model="depth" />
 		<label :for="`${id}-auto-expand`">{{ locales.autoExpand }}</label>
 		<label>
 			<VPSwitch :id="`${id}-auto-expand`" v-model="autoExpand" />

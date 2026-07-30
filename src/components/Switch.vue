@@ -27,6 +27,10 @@ const on = defineModel<boolean>({ default: false });
 	&:hover {
 		border-color: var(--vp-c-brand-1);
 	}
+
+	&:active .check {
+		background-color: var(--vp-c-bg-soft);
+	}
 }
 
 .check {
