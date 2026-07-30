@@ -12,9 +12,9 @@ When the depth is set to `2`, only `<h2>` headings are shown; set it to `6` and 
 
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./screenshots/screenshot-dark.png" />
-    <source media="(prefers-color-scheme: light)" srcset="./screenshots/screenshot-light.png" />
-    <img alt="Screenshot of the Outline Depth Plugin" src="./screenshots/screenshot-light.png" height="300" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/otomad/vitepress-plugin-outline-depth/raw/main/screenshots/screenshot-dark.png" />
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/otomad/vitepress-plugin-outline-depth/raw/main/screenshots/screenshot-light.png" />
+    <img alt="Screenshot of the Outline Depth Plugin" src="https://github.com/otomad/vitepress-plugin-outline-depth/raw/main/screenshots/screenshot-light.png" height="300" />
   </picture>
 </div>
 
