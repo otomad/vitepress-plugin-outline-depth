@@ -8,12 +8,10 @@ const depth = ref(options.default!.depth);
 const autoExpand = ref(options.default!.autoExpand);
 type Configs = NonNullable<typeof options.default>;
 const LOCAL_STORAGE_KEY = "vitepress-outline-depth";
-{
+
+if (options.saveToLocalStorage && inBrowser) {
 	const configs = loadLocalStorage<Configs>(LOCAL_STORAGE_KEY);
-	if (configs) {
-		depth.value = configs.depth;
-		autoExpand.value = configs.autoExpand;
-	}
+	if (configs) ({ depth: depth.value, autoExpand: autoExpand.value } = configs);
 }
 
 watch(
@@ -22,7 +20,7 @@ watch(
 		if (!inBrowser) return;
 		document.body.style.setProperty("--outline-depth", String(depth));
 		document.body.style.setProperty("--outline-auto-expand", String(autoExpand));
-		saveLocalStorage(LOCAL_STORAGE_KEY, { depth, autoExpand });
+		if (options.saveToLocalStorage) saveLocalStorage(LOCAL_STORAGE_KEY, { depth, autoExpand });
 	},
 	{ immediate: true },
 );
@@ -31,12 +29,10 @@ watch(
 <script setup lang="ts">
 import VPSwitch from "./Switch.vue";
 import Slider from "./Slider.vue";
-import { useI18n } from "../composables/i18n.js";
+import { useLocales } from "../composables/locales.js";
 
-const t = useI18n();
+const locales = useLocales();
 const id = useId();
-const depthLabel = t({ en: "Outline depth", zh: "目录层级" });
-const autoExpandLabel = t({ en: "Auto expand", zh: "自动展开" });
 
 const outlineMarker = ref<HTMLDivElement>();
 const observer = ref<MutationObserver>();
@@ -58,9 +54,9 @@ onUnmounted(() => {
 
 <template>
 	<div class="outline-depth-toggle">
-		<label :for="`${id}-depth`">{{ depthLabel }}</label>
+		<label :for="`${id}-depth`">{{ locales.depth }}</label>
 		<Slider :id="`${id}-depth`" min="2" max="6" step="1" v-model="depth" />
-		<label :for="`${id}-auto-expand`">{{ autoExpandLabel }}</label>
+		<label :for="`${id}-auto-expand`">{{ locales.autoExpand }}</label>
 		<label>
 			<VPSwitch :id="`${id}-auto-expand`" v-model="autoExpand" />
 		</label>

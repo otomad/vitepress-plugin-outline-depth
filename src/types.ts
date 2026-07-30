@@ -21,7 +21,7 @@ export interface OutlineDepthPluginOptions {
 		string,
 		{
 			/**
-			 * Specify the localized label text of Outline Depth.
+			 * Specify the localized label text for Outline Depth.
 			 * @default
 			 * ```markdown
 			 * - en: Outline depth
@@ -30,7 +30,7 @@ export interface OutlineDepthPluginOptions {
 			 */
 			depth: string;
 			/**
-			 * Specify the localized label text of Auto Expand.
+			 * Specify the localized label text for Auto Expand.
 			 * @default
 			 * ```markdown
 			 * - en: Auto expand
