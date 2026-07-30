@@ -1,4 +1,5 @@
 import { useData } from "vitepress";
+import { computed } from "vue";
 import options from "virtual:outline-depth-plugin-options";
 import type { OutlineDepthPluginOptions } from "../types.js";
 
@@ -34,7 +35,9 @@ function getPossibleCurrentLocales(lang: string) {
 
 export function useLocales() {
 	const { lang } = useData();
-	const keys = getPossibleCurrentLocales(lang.value);
-	for (const key of keys) if (Object.hasOwn(locales, key)) return locales[key];
-	return locales.en;
+	return computed(() => {
+		const keys = getPossibleCurrentLocales(lang.value);
+		for (const key of keys) if (Object.hasOwn(locales, key)) return locales[key];
+		return locales.en;
+	});
 }

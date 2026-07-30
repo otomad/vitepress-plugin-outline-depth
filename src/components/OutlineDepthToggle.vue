@@ -69,7 +69,7 @@
 			</div>
 			<label :for="`${id}-auto-expand`">{{ locales.autoExpand }}</label>
 			<label>
-				<VPSwitch :id="`${id}-auto-expand`" v-model="autoExpand" />
+				<VPSwitch :id="`${id}-auto-expand`" v-model="autoExpand" :disabled="depth === 6" />
 			</label>
 		</div>
 	</div>
@@ -85,7 +85,7 @@
 			grid-template-columns: auto 1fr;
 			gap: 8px 6.4px;
 			align-items: center;
-			padding-block: 4px 6px;
+			padding-block: 4px;
 			padding-inline: 16px 0;
 			border-inline-start: 1px solid var(--vp-c-divider);
 		}
@@ -114,7 +114,7 @@
 						black calc(100% - var(--aside-curtain-mask-size)),
 						transparent 100%
 					);
-					padding-block: 10px calc(6px + var(--aside-curtain-mask-size));
+					padding-block: 10px calc(4px + var(--aside-curtain-mask-size));
 					margin-block: -6px calc(-1 * var(--aside-curtain-mask-size));
 				}
 			}

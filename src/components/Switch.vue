@@ -20,12 +20,16 @@
 		flex-shrink: 0;
 		border: 1px solid var(--vp-input-border-color);
 		background-color: var(--vp-input-switch-bg-color);
-		transition:
-			border-color 0.25s,
-			background-color 0.25s !important;
+		transition: 250ms !important;
+		transition-property: border-color, background-color, opacity !important;
 
-		&:hover {
+		&:hover:not(:disabled) {
 			border-color: var(--vp-c-brand-1);
+		}
+
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
 		}
 	}
 
@@ -39,9 +43,9 @@
 		border-radius: 50%;
 		background-color: var(--vp-c-neutral-inverse);
 		box-shadow: var(--vp-shadow-1);
-		transition: all 0.25s !important;
+		transition: all 250ms !important;
 
-		.VPSwitch:active & {
+		.VPSwitch:active:not(:disabled) & {
 			background-color: var(--vp-c-bg-soft);
 		}
 	}
@@ -54,7 +58,8 @@
 		background-color: var(--vp-c-brand-1);
 		border-color: var(--vp-c-brand-1);
 
-		&:hover {
+		&:hover:not(:disabled) {
+			background-color: var(--vp-c-brand-3);
 			border-color: var(--vp-c-brand-3);
 		}
 
@@ -68,7 +73,7 @@
 			background-color: var(--vp-c-default-2);
 		}
 
-		&:active .check {
+		&:active:not(:disabled) .check {
 			background-color: var(--vp-c-default-3);
 		}
 	}
