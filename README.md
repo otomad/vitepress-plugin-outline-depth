@@ -6,6 +6,8 @@ When the depth is set to `2`, only `<h2>` headings are shown; set it to `6` and 
 
 > **Note:** When the outline depth is set to `6`, the Auto Expand toggle has no effect — since every heading level is already visible, expanding or collapsing makes no difference.
 
+> **Important:** The maximum depth is subject to the default theme configuration `themeConfig.outline.level`. It is recommended to set it to the `"deep"` value.
+
 ## Screenshot
 
 <div align="center">
@@ -78,6 +80,8 @@ The minimum value the outline depth slider can be set to. Must be less than `max
 
 The maximum value the outline depth slider can be set to. Must be greater than `minDepth`.
 
+Note that the maximum depth is subject to the default theme configuration `themeConfig.outline.level`. It is recommended to set it to the `"deep"` value.
+
 ### `locales`
 
 - **Type:** `Record<string, { depth: string; autoExpand: string }>`
@@ -125,6 +129,13 @@ When enabled, the outline depth controls stick to the top of the sidebar outline
 - **Default:** `true`
 
 When enabled, the active outline link (the marker indicating the current heading) is automatically scrolled into view as the reader scrolls through the page content.
+
+### `setConfigOutlineLevelToDeep`
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+When enabled, the `.vitepress.config.js/ts` user config `themeConfig.outline.level` will set to the `"deep"` value in every locales.
 
 ## Full Example
 

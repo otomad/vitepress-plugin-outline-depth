@@ -42,7 +42,7 @@ export interface OutlineDepthPluginOptions {
 		}
 	>;
 	/**
-	 * Save the config to local storage.
+	 * Save the config to local storage?
 	 *
 	 * @default true
 	 */
@@ -60,17 +60,24 @@ export interface OutlineDepthPluginOptions {
 	 */
 	maxDepth?: AvailableDepthValue;
 	/**
-	 * Stick the Outline Depth Toggle component at the top of the outline aside.
+	 * Stick the Outline Depth Toggle component at the top of the outline aside?
 	 *
 	 * @default true
 	 */
 	stickAtTop?: boolean;
 	/**
-	 * Automatically scroll the outline active outline link (or outline marker) into view when scrolling.
+	 * Automatically scroll the outline active outline link (or outline marker) into view when scrolling?
 	 *
 	 * @default true
 	 */
 	scrollActiveOutlineLinkIntoView?: boolean;
+	/**
+	 * Automatically set the default theme configuration `themeConfig.outline.level` to the `"deep"` value in every
+	 * locales?
+	 *
+	 * @default true
+	 */
+	setConfigOutlineLevelToDeep?: boolean;
 }
 
 export interface OutlineDepthLocalStorageConfigs {
