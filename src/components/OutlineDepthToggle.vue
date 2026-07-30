@@ -7,7 +7,6 @@
 
 	const depth = ref(options.defaultDepth!);
 	const autoExpand = ref(options.defaultAutoExpand!);
-	const stick = options.stickAtTop!;
 	const LOCAL_STORAGE_KEY = "vitepress-outline-depth";
 
 	if (options.saveToLocalStorage && inBrowser) {
@@ -61,11 +60,11 @@
 </script>
 
 <template>
-	<div class="outline-depth-toggle" :class="{ stick }">
+	<div class="outline-depth-toggle" :class="{ stick: options.stickAtTop }">
 		<div class="content">
 			<label :for="`${id}-depth`" @click="focusForElementByLabel">{{ locales.depth }}</label>
 			<div class="slider-wrapper">
-				<Slider :id="`${id}-depth`" :min="2" :max="6" :step="1" v-model="depth" />
+				<Slider :id="`${id}-depth`" :min="options.minDepth" :max="options.maxDepth" :step="1" v-model="depth" />
 			</div>
 			<label :for="`${id}-auto-expand`">{{ locales.autoExpand }}</label>
 			<label>
