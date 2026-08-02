@@ -1,5 +1,11 @@
 # vitepress-plugin-outline-depth
 
+[![npm](https://img.shields.io/npm/v/vitepress-plugin-outline-depth?logo=npm&logoColor=%23CB3837&label=npm&labelColor=white&color=%23CB3837)](https://www.npmjs.org/package/vitepress-plugin-outline-depth)
+[![GitHub](https://img.shields.io/npm/v/vitepress-plugin-outline-depth?logo=github&label=GitHub&color=%23181717)](https://github.com/otomad/vitepress-plugin-outline-depth)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)][license-url]
+
+[license-url]: https://opensource.org/licenses/MIT
+
 A [VitePress](https://vitepress.dev/) plugin that adds controls to the documentation sidebar (outline / table of contents), allowing readers to control how many heading levels are displayed in the page outline.
 
 When the depth is set to `2`, only `<h2>` headings are shown; set it to `6` and all heading levels from `<h2>` through `<h6>` are visible. The **Auto Expand** toggle controls whether the outline automatically expands to reveal the section the reader is currently viewing. For example, with depth set to `2`, all other `<h2>` groups stay collapsed while the currently active section expands from its ancestor `<h2>` all the way down to the current heading.
@@ -23,8 +29,10 @@ When the depth is set to `2`, only `<h2>` headings are shown; set it to `6` and 
 ```bash
 # npm
 npm install vitepress-plugin-outline-depth
+
 # yarn
 yarn add vitepress-plugin-outline-depth
+
 # pnpm
 pnpm add vitepress-plugin-outline-depth
 ```

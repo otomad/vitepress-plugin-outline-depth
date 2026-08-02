@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { useTemplateRef, reactive, computed } from "vue";
+	import { useTemplateRef, reactive, computed, ref } from "vue";
 	import { clamp, map } from "../composables/math.js";
 
 	const props = withDefaults(
@@ -21,7 +21,8 @@
 	}>();
 
 	const value = defineModel<number>({ default: 0 });
-	const cssValue = computed(() => clamp(map(value.value, props.min, props.max, 0, 1), 0, 1));
+	const clampedCssValue = computed(() => clamp(map(value.value, props.min, props.max, 0, 1), 0, 1));
+	const cssValue = ref<number>(0);
 
 	const sliderEl = useTemplateRef("slider");
 	const thumbEl = useTemplateRef("thumb");
@@ -68,6 +69,7 @@
 				let newValue = clampValue(map(position, 0, width - thumbSize, props.min, props.max));
 				if (isRtl()) newValue = props.max - newValue + props.min;
 				value.value = newValue;
+				cssValue.value = (clamp(map(position, 0, width - thumbSize, 0, 1), 0, 1) + clampedCssValue.value) / 2;
 				emits("changing", newValue);
 			},
 			{ signal: aborter.signal },
@@ -77,6 +79,7 @@
 			() => {
 				aborter.abort();
 				thumb.releasePointerCapture(e.pointerId);
+				cssValue.value = clampedCssValue.value;
 				emits("change", value.value);
 			},
 			{ signal: aborter.signal },
@@ -132,6 +135,7 @@
 		@keydown="onKeyDown"
 	>
 		<div class="track"></div>
+		<div class="past"></div>
 		<div class="thumb" ref="thumb" @pointerdown="onThumbDown"></div>
 	</div>
 </template>
@@ -142,6 +146,7 @@
 		--track-thickness: 1px;
 
 		position: relative;
+		display: grid;
 		inline-size: 100%;
 		block-size: var(--thumb-size);
 		align-content: center;
@@ -158,29 +163,37 @@
 		}
 	}
 
-	.track {
-		--direction-towards: right;
-		--slider-track-color-stop-percentage: calc(var(--value) * (100% - var(--thumb-size)) + var(--thumb-size) / 2);
+	.track,
+	.past {
 		inline-size: 100%;
 		block-size: var(--track-thickness);
 		margin-block: auto;
 		border-radius: calc(infinity * 1px);
-		background-image: linear-gradient(
-			to var(--direction-towards),
-			var(--vp-c-brand-1) var(--slider-track-color-stop-percentage),
-			var(--vp-input-border-color) var(--slider-track-color-stop-percentage)
-		);
-		transition: --slider-track-color-stop-percentage 250ms;
+		grid-area: 1 / 1;
+		transition: 250ms;
+	}
 
-		&:dir(rtl) {
-			--direction-towards: left;
+	.track {
+		background-color: var(--vp-input-border-color);
+		transition-property: background-color;
+
+		.slider:hover & {
+			background-color: var(--gray9);
+
+			html.dark & {
+				--track-future-color: var(--gray8);
+			}
 		}
 	}
 
-	@property --slider-track-color-stop-percentage {
-		syntax: "<length-percentage>";
-		initial-value: 0;
-		inherits: true;
+	.past {
+		background-color: var(--vp-c-brand-1);
+		inline-size: calc(var(--value) * (100% - var(--thumb-size)) + var(--thumb-size) / 2);
+		transition-property: background-color, inline-size;
+
+		.slider:hover & {
+			background-color: var(--vp-c-brand-3);
+		}
 	}
 
 	.thumb {
@@ -193,7 +206,7 @@
 		box-shadow: var(--vp-shadow-1);
 		inset-block-start: 0;
 		transition: 250ms;
-		transition-property: background-color, border, inset-inline-start;
+		transition-property: background-color, border;
 		inset-inline-start: calc(var(--value) * (100% - var(--thumb-size)));
 
 		.slider:active &,
