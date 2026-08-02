@@ -1,5 +1,6 @@
 <script setup lang="ts">
-	import { useTemplateRef, reactive, computed, ref } from "vue";
+	import { useSmoothValue } from "smooth-value/vue";
+	import { useTemplateRef, reactive, computed, ref, nextTick } from "vue";
 	import { clamp, map } from "../composables/math.js";
 
 	const props = withDefaults(
@@ -23,6 +24,7 @@
 	const value = defineModel<number>({ default: 0 });
 	const clampedCssValue = computed(() => clamp(map(value.value, props.min, props.max, 0, 1), 0, 1));
 	const cssValue = ref<number>(0);
+	const smoothCssValue = useSmoothValue(cssValue, 0.5);
 
 	const sliderEl = useTemplateRef("slider");
 	const thumbEl = useTemplateRef("thumb");
@@ -50,6 +52,10 @@
 		return value;
 	}
 
+	function adsorbCssValue(preciseValue: number, min: number, max: number) {
+		cssValue.value = (clamp(map(preciseValue, min, max, 0, 1), 0, 1) + clampedCssValue.value * 1.5) / 2.5;
+	}
+
 	function onThumbDown(e: PointerEvent, triggerByTrack: boolean = false) {
 		const slider = sliderEl.value,
 			thumb = thumbEl.value;
@@ -69,7 +75,7 @@
 				let newValue = clampValue(map(position, 0, width - thumbSize, props.min, props.max));
 				if (isRtl()) newValue = props.max - newValue + props.min;
 				value.value = newValue;
-				cssValue.value = (clamp(map(position, 0, width - thumbSize, 0, 1), 0, 1) + clampedCssValue.value) / 2;
+				adsorbCssValue(position, 0, width - thumbSize);
 				emits("changing", newValue);
 			},
 			{ signal: aborter.signal },
@@ -96,6 +102,7 @@
 		let newValue = clampValue(map(e.offsetX, thumbSizeHalf, width - thumbSizeHalf, props.min, props.max));
 		if (isRtl()) newValue = props.max - newValue + props.min;
 		value.value = newValue;
+		nextTick(() => adsorbCssValue(e.offsetX, thumbSizeHalf, width - thumbSizeHalf));
 		emits("changing", newValue);
 		onThumbDown(e, true); // Then call the dragging slider event.
 	}
@@ -130,7 +137,7 @@
 		:aria-valuemin="min"
 		:aria-valuemax="max"
 		:aria-valuenow="value"
-		:style="{ '--value': cssValue }"
+		:style="{ '--value': smoothCssValue }"
 		@pointerdown="onTrackDown"
 		@keydown="onKeyDown"
 	>
@@ -189,7 +196,7 @@
 	.past {
 		background-color: var(--vp-c-brand-1);
 		inline-size: calc(var(--value) * (100% - var(--thumb-size)) + var(--thumb-size) / 2);
-		transition-property: background-color, inline-size;
+		transition-property: background-color;
 
 		.slider:hover & {
 			background-color: var(--vp-c-brand-3);

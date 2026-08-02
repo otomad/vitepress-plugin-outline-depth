@@ -58,5 +58,8 @@
 		"outline",
 		"depth",
 		"auto-expand"
-	]
+	],
+	"dependencies": {
+		"smooth-value": "file:D:/smooth-value"
+	}
 }
