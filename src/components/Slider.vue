@@ -21,10 +21,14 @@
 		changing: [value: number];
 	}>();
 
+	const isRtl = () => document.documentElement.dir === "rtl";
+
 	const value = defineModel<number>({ default: 0 });
 	const linearPreciseOffsetValue = ref<number>();
-	const setLinearPreciseOffsetValue = (preciseValue: number, min: number, max: number) =>
-		(linearPreciseOffsetValue.value = clamp(map(preciseValue, min, max, 0, 1), 0, 1));
+	const setLinearPreciseOffsetValue = (preciseValue: number, min: number, max: number) => {
+		linearPreciseOffsetValue.value = clamp(map(preciseValue, min, max, 0, 1), 0, 1);
+		if (isRtl()) linearPreciseOffsetValue.value = 1 - linearPreciseOffsetValue.value;
+	};
 	const cssValue = computed(() => {
 		const clampedCssValue = clamp(map(value.value, props.min, props.max, 0, 1), 0, 1);
 		return linearPreciseOffsetValue.value == null
@@ -48,7 +52,6 @@
 		}
 		return _cssVars;
 	}
-	const isRtl = () => document.documentElement.dir === "rtl";
 	const removeSelection = () => {
 		document.getSelection()?.removeAllRanges();
 	};

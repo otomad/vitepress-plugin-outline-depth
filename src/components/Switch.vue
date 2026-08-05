@@ -63,9 +63,13 @@
 			border-color: var(--vp-c-brand-3);
 		}
 
-		.check {
+		.check:dir(ltr) {
 			translate: 18px;
 		}
+	}
+
+	.VPSwitch:not(:has(input:checked)) .check:dir(rtl) {
+		translate: 18px;
 	}
 
 	html.dark .VPSwitch:not(:has(input:checked)) {
