@@ -1,6 +1,6 @@
 import { useData } from "vitepress";
 import { computed } from "vue";
-import options from "virtual:outline-depth-plugin-options";
+import options from "virtual:vitepress-plugin-outline-depth/plugin-options";
 import type { OutlineDepthPluginOptions } from "../types.js";
 
 const locales: NonNullable<OutlineDepthPluginOptions["locales"]> = {

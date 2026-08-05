@@ -1,4 +1,4 @@
-declare module "virtual:outline-depth-plugin-options" {
+declare module "virtual:vitepress-plugin-outline-depth/plugin-options" {
 	const OutlineDepthPluginOptions: import("./types.ts").OutlineDepthPluginOptions;
 	export default OutlineDepthPluginOptions;
 }

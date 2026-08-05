@@ -8,8 +8,9 @@ const componentFile = `${componentName}.vue`;
 const aliasComponentFile = `${import.meta.dirname}/components/${componentFile}`;
 
 const pluginName = "vitepress-plugin-outline-depth";
-const virtualModuleId = "virtual:outline-depth-plugin-options";
+const virtualModuleId = `virtual:${pluginName}/plugin-options`;
 const resolvedVirtualModuleId = `\0${virtualModuleId}`;
+const virtualAliasComponentId = `virtual:${pluginName}/${componentFile}`;
 
 const slots = ["aside-outline-before"];
 
@@ -40,7 +41,7 @@ Current values:
 			return {
 				resolve: {
 					alias: {
-						[`./${componentFile}`]: aliasComponentFile,
+						[virtualAliasComponentId]: aliasComponentFile,
 					},
 				},
 			};
@@ -64,7 +65,7 @@ Current values:
 				for (const localeConfig of Object.values(userConfig.locales)) setOutlineLevelToDeep(localeConfig);
 		},
 		transform(code, id) {
-			// Inject into standard VitePress Default Theme Layout
+			// Inject into standard VitePress Default Theme Layout.
 			if (id.endsWith("vitepress/dist/client/theme-default/Layout.vue")) {
 				let transformResult = code;
 
@@ -77,7 +78,7 @@ Current values:
 				const setupPosition = '<script setup lang="ts">';
 				transformResult = transformResult.replace(
 					setupPosition,
-					`${setupPosition}\nimport ${componentName} from './${componentName}.vue'`,
+					`${setupPosition}\nimport ${componentName} from '${virtualAliasComponentId}'`,
 				);
 				return transformResult;
 			}

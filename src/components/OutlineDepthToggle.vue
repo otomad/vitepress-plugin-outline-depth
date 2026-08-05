@@ -1,5 +1,5 @@
 <script lang="ts">
-	import options from "virtual:outline-depth-plugin-options";
+	import options from "virtual:vitepress-plugin-outline-depth/plugin-options";
 	import { inBrowser } from "vitepress";
 	import { ref, watch, useId, onMounted, onUnmounted } from "vue";
 	import { saveLocalStorage, loadLocalStorage } from "../composables/local-storage.js";
