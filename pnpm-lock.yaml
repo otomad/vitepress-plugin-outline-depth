@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       smooth-value:
-        specifier: file:D:/smooth-value
-        version: file:../smooth-value(vue@3.5.40(typescript@6.0.3))
+        specifier: ^1.1.0
+        version: 1.1.0
     devDependencies:
       '@types/node':
         specifier: ^26.1.2
@@ -1513,16 +1513,8 @@ packages:
   shiki@2.5.0:
     resolution: {integrity: sha512-mI//trrsaiCIPsja5CNfsyNOqgAZUb6VpJA+340toL42UpzQlXpwRV9nch69X6gaUxrr9kaOOa6e3y3uAkGFxQ==}
 
-  smooth-value@file:../smooth-value:
-    resolution: {directory: ../smooth-value, type: directory}
-    peerDependencies:
-      react: '>=16.8.0'
-      vue: '>=3.0.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
-      vue:
-        optional: true
+  smooth-value@1.1.0:
+    resolution: {integrity: sha512-mKlwmFjgXucUdVxGmj48h0EH/dajPfqU7U8Kt8S1W6Lvhm9c65DQEh9Oa0EGYEioLAaWNcM8qSWEUs4at4GIhQ==}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -3049,9 +3041,7 @@ snapshots:
       '@shikijs/vscode-textmate': 10.0.2
       '@types/hast': 3.0.5
 
-  smooth-value@file:../smooth-value(vue@3.5.40(typescript@6.0.3)):
-    optionalDependencies:
-      vue: 3.5.40(typescript@6.0.3)
+  smooth-value@1.1.0: {}
 
   source-map-js@1.2.1: {}
 

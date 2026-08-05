@@ -60,6 +60,6 @@
 		"auto-expand"
 	],
 	"dependencies": {
-		"smooth-value": "file:D:/smooth-value"
+		"smooth-value": "^1.1.0"
 	}
 }
