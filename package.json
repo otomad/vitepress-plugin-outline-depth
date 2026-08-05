@@ -26,7 +26,7 @@
 		"test": "vitest",
 		"clear": "rimraf dist",
 		"fmt:dist": "oxfmt dist/",
-		"build": "pnpm run clear && vite build",
+		"build": "pnpm run clear && vite build && pnpm run fmt:dist",
 		"watch": "pnpm run /^watch:.*/",
 		"watch:tsc": "tsc --watch",
 		"watch:component": "cpx \"src/components/**/*.vue\" dist/components --watch"

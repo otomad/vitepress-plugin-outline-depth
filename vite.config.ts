@@ -1,42 +1,56 @@
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import dts from "vite-plugin-dts";
-import { resolve, relative, extname, dirname } from "node:path";
 import { readdirSync, readFileSync, writeFileSync, unlinkSync, existsSync, renameSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { resolve, relative, dirname } from "node:path";
+import vue from "@vitejs/plugin-vue";
+import { defineConfig } from "vite";
+import dts from "vite-plugin-dts";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const srcDir = resolve(__dirname, "src");
+const srcDir = resolve(import.meta.dirname, "src");
+const distDir = resolve(import.meta.dirname, "dist");
 
-/**
- * Recursively walk a directory, yielding all .ts (excluding .d.ts) and .vue files.
- */
+// ── Auto-detect external dependencies from package.json ──
+const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, "package.json"), "utf-8"));
+const depNames = Object.keys(pkg.dependencies ?? {});
+const external = [
+	...depNames,
+	// Sub-paths of runtime deps (e.g. smooth-value/vue)
+	...depNames.map(d => new RegExp(`^${d.replace(/\//g, "\\/")}/`)),
+	// VitePress plugin externals
+	"vue",
+	"vitepress",
+	/^virtual:.*/,
+];
+
+// ── Auto-discover all .ts (except .d.ts) and .vue files under src/ ──
 function* walk(dir: string): Generator<string> {
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
-		const fullPath = resolve(dir, entry.name);
+		const full = resolve(dir, entry.name);
 		if (entry.isDirectory()) {
-			yield* walk(fullPath);
-		} else if (entry.isFile()) {
-			const ext = extname(entry.name);
-			// Skip ambient declaration files
-			if (ext === ".ts" && entry.name.endsWith(".d.ts")) continue;
-			if (ext === ".ts" || ext === ".vue") {
-				yield fullPath;
-			}
+			yield* walk(full);
+			continue;
 		}
+		if (entry.name.endsWith(".d.ts")) continue;
+		if (entry.name.endsWith(".ts") || entry.name.endsWith(".vue")) yield full;
 	}
 }
 
-/**
- * Build a Rollup-compatible entries object, mapping output paths to source files.
- */
-function getEntries(srcDir: string): Record<string, string> {
-	const entries: Record<string, string> = {};
-	for (const file of walk(srcDir)) {
-		const name = relative(srcDir, file).replace(/\.(ts|vue)$/, "");
-		entries[name] = file;
+function getEntries(): Record<string, string> {
+	const e: Record<string, string> = {};
+	for (const f of walk(srcDir)) e[relative(srcDir, f).replace(/\.(ts|vue)$/, "")] = f;
+	return e;
+}
+
+// ── Utility: collect all file paths under a directory ──
+function collectFiles(root: string): Set<string> {
+	const s = new Set<string>();
+	function crawl(dir: string, prefix: string): void {
+		for (const e of readdirSync(dir, { withFileTypes: true })) {
+			const rel = prefix + e.name;
+			if (e.isDirectory()) crawl(resolve(dir, e.name), rel + "/");
+			else s.add(rel);
+		}
 	}
-	return entries;
+	crawl(root, "");
+	return s;
 }
 
 // https://vite.dev/config/
@@ -47,182 +61,205 @@ export default defineConfig({
 			tsconfigPath: "./tsconfig.json",
 			outDirs: "dist",
 			entryRoot: "src",
-			// Let the plugin use tsconfig defaults for include/exclude.
-			// copyDtsFiles defaults to false, so src/*.d.ts won't be copied to dist.
+			processor: "vue",
+			cleanVueFileName: true,
 		}),
 		/**
-		 * Post-process the build output to fix file locations for Vue SFC chunks.
-		 *
-		 * In Vite library mode with multi-entry, Vue SFCs with only <script setup>
-		 * create thin entry facades in subdirectories while placing the actual
-		 * component code in chunks at the dist root. CSS from Vue SFCs and the
-		 * shared _plugin-vue_export-helper also end up at the dist root.
-		 *
-		 * This plugin moves them into the correct subdirectory and patches imports.
+		 * Post-process Vue SFC build output in library mode: 1. Detect thin entry facades → replace with actual code
+		 * chunks. 2. Update cross-file imports after chunk relocation. 3. Move auxiliary files (CSS, helpers) into
+		 * components/. 4. Add CSS side-effect imports to Vue component JS. 5. Generate .d.ts for each Vue component.
 		 */
 		{
-			name: "vitepress-outline-depth:fix-chunk-locations",
+			name: "fix-vue-output",
 			enforce: "post",
 			closeBundle() {
-				const distDir = resolve(__dirname, "dist");
+				const read = (rel: string) => readFileSync(resolve(distDir, rel), "utf-8");
+				const write = (rel: string, c: string) => writeFileSync(resolve(distDir, rel), c);
+				const abs = (rel: string) => resolve(distDir, rel);
 
+				// ── Helpers ──
 				/**
-				 * Move a file from srcRel to dstRel within dist, adjusting internal
-				 * "./xxx" relative imports to account for the directory change.
+				 * Fix relative import paths when a file is moved.
 				 */
-				function moveAndPatch(srcRel: string, dstRel: string): void {
-					const srcAbs = resolve(distDir, srcRel);
-					const dstAbs = resolve(distDir, dstRel);
-					if (!existsSync(srcAbs)) return;
-
-					let content = readFileSync(srcAbs, "utf-8");
-
-					// When moving from a shallower directory to a deeper one,
-					// local "./xxx" imports need "../" prefixing.
-					const srcDirName = dirname(srcRel);
-					const dstDirName = dirname(dstRel);
-					if (srcDirName !== dstDirName) {
-						const srcParts = srcDirName === "." ? [] : srcDirName.split("/");
-						const dstParts = dstDirName === "." ? [] : dstDirName.split("/");
-						const upLevels = dstParts.length - srcParts.length;
-						if (upLevels > 0) {
-							const prefix = "../".repeat(upLevels);
-							content = content.replace(
-								/from "(\.[^"]+)"/g,
-								(_m: string, p: string) => `from "${prefix}${p.slice(2)}"`,
-							);
-							content = content.replace(
-								/from '(\.[^']+)'/g,
-								(_m: string, p: string) => `from '${prefix}${p.slice(2)}'`,
-							);
-						}
-					}
-
-					writeFileSync(dstAbs, content);
-					if (resolve(srcAbs) !== resolve(dstAbs)) {
-						unlinkSync(srcAbs);
-					}
+				function adjustImportsForMove(code: string, fromDir: string, toDir: string): string {
+					const srcParts = fromDir === "." ? [] : fromDir.split("/");
+					const dstParts = toDir === "." ? [] : toDir.split("/");
+					const up = dstParts.length - srcParts.length;
+					if (up <= 0) return code;
+					const prefix = "../".repeat(up);
+					return code.replace(
+						/from "(\.[^"]+)"/g,
+						(_m: string, p: string) => `from "${prefix}${p.slice(2)}"`,
+					);
 				}
 
 				/**
-				 * Update all import references to a moved file across every .js
-				 * file in dist. Ensures relative paths always start with ./ or ../
-				 * to avoid bare specifiers (which resolve as node_modules packages).
+				 * Patch import specifier in a JS file: oldRef → newRef.
 				 */
-				function updateReferences(oldRel: string, newRel: string): void {
-					const oldAbs = resolve(distDir, oldRel);
-					const newAbs = resolve(distDir, newRel);
-
-					function walkJsFiles(dir: string): void {
-						for (const entry of readdirSync(dir, { withFileTypes: true })) {
-							const fullPath = resolve(dir, entry.name);
-							if (entry.isDirectory()) {
-								walkJsFiles(fullPath);
-							} else if (entry.isFile() && entry.name.endsWith(".js")) {
-								const fileDir = dirname(fullPath);
-								const oldImport = relative(fileDir, oldAbs).replace(/\\/g, "/");
-								let newImport = relative(fileDir, newAbs).replace(/\\/g, "/");
-								if (oldImport === newImport) continue;
-
-								// Ensure the new import is a valid relative path
-								if (!newImport.startsWith(".")) {
-									newImport = "./" + newImport;
-								}
-
-								const escapedOld = oldImport.replace(
-									/[.*+?^${}()|[\]\\]/g,
-									"\\$&",
-								);
-								const regex = new RegExp(
-									`(from\\s")${escapedOld}(")`,
-									"g",
-								);
-
-								const content = readFileSync(fullPath, "utf-8");
-								const updated = content.replace(
-									regex,
-									`$1${newImport}$2`,
-								);
-								if (updated !== content) {
-									writeFileSync(fullPath, updated);
-								}
-							}
-						}
+				function patchImport(file: string, oldRel: string, newRel: string): boolean {
+					if (oldRel === newRel) return false;
+					const escaped = oldRel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+					// Match the import path between quotes (no \b, since " → .
+					// is not a word boundary)
+					const re = new RegExp(`(from ")${escaped}(")`, "g");
+					const content = read(file);
+					const normNew = newRel.startsWith(".") ? newRel : "./" + newRel;
+					const updated = content.replace(re, `$1${normNew}$2`);
+					if (updated !== content) {
+						write(file, updated);
+						return true;
 					}
-					walkJsFiles(distDir);
+					return false;
 				}
 
-				// ── Move helper FIRST so Slider/Switch can reference it at the new location ──
-				moveAndPatch(
-					"_plugin-vue_export-helper.js",
-					"components/_plugin-vue_export-helper.js",
-				);
-				updateReferences(
-					"_plugin-vue_export-helper.js",
-					"components/_plugin-vue_export-helper.js",
-				);
+				let files = collectFiles(distDir);
 
-				// ── Move Slider chunk (root) → components/Slider.js (overwrites facade) ──
-				moveAndPatch("Slider.js", "components/Slider.js");
-				updateReferences("Slider.js", "components/Slider.js");
+				// ══════════════════════════════════════════════════════════
+				// Phase 1: Detect facade→chunk pairs
+				// ══════════════════════════════════════════════════════════
+				type Move = { facade: string; chunk: string };
+				const moves: Move[] = [];
 
-				// ── Move Switch chunk (root) → components/Switch.js (overwrites facade) ──
-				moveAndPatch("Switch.js", "components/Switch.js");
-				updateReferences("Switch.js", "components/Switch.js");
+				for (const file of files) {
+					if (!file.endsWith(".js")) continue;
+					const content = readFileSync(abs(file), "utf-8");
+					const m = content.match(/^import .+ from "(.+)";[\r\n]+export /m);
+					if (!m || content.length > 200) continue;
+					const importRel = relative(distDir, resolve(dirname(abs(file)), m[1])).replace(/\\/g, "/");
+					if (!files.has(importRel)) continue;
+					moves.push({ facade: file, chunk: importRel });
+				}
 
-				// Re-run helper reference update now that Slider/Switch are in
-				// components/: their "./" → "../" rewrite during moveAndPatch may
-				// have broken the import path to the helper.
-				updateReferences(
-					"_plugin-vue_export-helper.js",
-					"components/_plugin-vue_export-helper.js",
-				);
+				// ══════════════════════════════════════════════════════════
+				// Phase 2: Execute moves (overwrite facades)
+				// ══════════════════════════════════════════════════════════
+				for (const { facade, chunk } of moves) {
+					let code = read(chunk);
+					code = adjustImportsForMove(code, dirname(chunk), dirname(facade));
+					write(facade, code);
+					unlinkSync(abs(chunk));
+				}
 
-				// ── Move Vue CSS files from root into components/ ──
-				for (const cssFile of ["Slider.css", "Switch.css", "OutlineDepthToggle.css"]) {
-					const src = resolve(distDir, cssFile);
-					const dst = resolve(distDir, "components", cssFile);
-					if (existsSync(src)) {
-						if (existsSync(dst)) {
-							// Merge: root CSS after existing CSS
-							const srcContent = readFileSync(src, "utf-8");
-							const dstContent = readFileSync(dst, "utf-8");
-							writeFileSync(dst, dstContent + "\n" + srcContent);
-							unlinkSync(src);
-						} else {
-							renameSync(src, dst);
+				// ══════════════════════════════════════════════════════════
+				// Phase 3: Update references across all JS files
+				// ══════════════════════════════════════════════════════════
+				files = collectFiles(distDir);
+				for (const { facade, chunk } of moves) {
+					for (const file of files) {
+						if (!file.endsWith(".js")) continue;
+						patchImport(
+							file,
+							relative(dirname(abs(file)), abs(chunk)).replace(/\\/g, "/"),
+							relative(dirname(abs(file)), abs(facade)).replace(/\\/g, "/"),
+						);
+					}
+				}
+
+				// ══════════════════════════════════════════════════════════
+				// Phase 4: Move auxiliary files (CSS, helpers) → components/
+				// ══════════════════════════════════════════════════════════
+				files = collectFiles(distDir);
+				const relocations: { from: string; to: string }[] = [];
+
+				for (const file of files) {
+					if (file.startsWith("components/")) continue;
+					if (file === "index.js" || file === "types.js") continue;
+					if (file.endsWith(".d.ts")) continue;
+					if (file.startsWith("composables/")) continue;
+
+					const src = abs(file);
+					const to = "components/" + file.split("/").pop()!;
+					const dst = abs(to);
+
+					if (!existsSync(src)) continue;
+					if (existsSync(dst)) {
+						if (file.endsWith(".css")) {
+							writeFileSync(dst, readFileSync(dst, "utf-8") + "\n" + readFileSync(src, "utf-8"));
+						}
+						unlinkSync(src);
+					} else {
+						renameSync(src, dst);
+					}
+					relocations.push({ from: file, to });
+				}
+
+				// Phase 4b: Fix imports referencing relocated files
+				files = collectFiles(distDir);
+				for (const { from, to } of relocations) {
+					for (const file of files) {
+						if (!file.endsWith(".js")) continue;
+						patchImport(
+							file,
+							relative(dirname(abs(file)), abs(from)).replace(/\\/g, "/"),
+							relative(dirname(abs(file)), abs(to)).replace(/\\/g, "/"),
+						);
+					}
+				}
+
+				// ══════════════════════════════════════════════════════════
+				// Phase 5: Add CSS side-effect imports (CSS now in place)
+				// ══════════════════════════════════════════════════════════
+				files = collectFiles(distDir);
+
+				for (const file of files) {
+					if (!file.endsWith(".js")) continue;
+					// Target: files in components/ with PascalCase names
+					if (!/^components\/[A-Z]/.test(file)) continue;
+
+					const baseName = file.split("/").pop()!.replace(/\.js$/, "");
+					const fileDir = dirname(file);
+
+					for (const cssFile of files) {
+						if (!cssFile.endsWith(".css")) continue;
+						if (dirname(cssFile) !== fileDir) continue;
+						if (!cssFile.split("/").pop()!.startsWith(baseName)) continue;
+
+						const cssImport = `import "./${cssFile.split("/").pop()}";\n`;
+						let content = read(file);
+						if (!content.includes(cssImport)) {
+							content = cssImport + content;
+							write(file, content);
 						}
 					}
+				}
+
+				// ══════════════════════════════════════════════════════════
+				// Phase 6: Generate .d.ts stubs for Vue components
+				// ══════════════════════════════════════════════════════════
+				for (const file of files) {
+					if (!file.endsWith(".js")) continue;
+					if (!/^components\/[A-Z]/.test(file)) continue;
+
+					const dtsFile = file.replace(/\.js$/, ".d.ts");
+					if (files.has(dtsFile)) continue; // already exists from tsc
+
+					const dtsContent = [
+						"import type { DefineComponent } from 'vue';",
+						"declare const _default: DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>;",
+						"export default _default;",
+						"",
+					].join("\n");
+					writeFileSync(abs(dtsFile), dtsContent);
 				}
 			},
 		},
 	],
 	build: {
 		lib: {
-			// Every .ts / .vue file as its own entry point (no bundling of local modules)
-			entry: getEntries(srcDir),
+			entry: getEntries(),
 			formats: ["es"],
 		},
 		emptyOutDir: false,
 		minify: false,
-		// Extract CSS from Vue SFCs into separate files
 		cssCodeSplit: true,
 		rollupOptions: {
 			output: {
-				// Consistent output naming — mirrors the src directory structure
 				entryFileNames: "[name].js",
 				chunkFileNames: "[name].js",
 				assetFileNames: "[name].[ext]",
 			},
-			// No tree-shaking / dead-code elimination
 			treeshake: false,
-			external: [
-				"vue",
-				"vitepress",
-				"smooth-value",
-				"smooth-value/vue",
-				/^virtual:.*/,
-			],
+			external,
 		},
 	},
 });
