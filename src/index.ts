@@ -25,8 +25,9 @@ export default function outlineDepthPlugin(options: OutlineDepthPluginOptions = 
 	options.scrollActiveOutlineLinkIntoView ??= true;
 	options.setConfigOutlineLevelToDeep ??= true;
 	if (options.maxDepth <= options.minDepth)
-		throw new RangeError(`\`${pluginName}\` Options Error.
-\`maxDepth\` cannot less than or equal to \`minDepth\`\n
+		throw new RangeError(`\`${pluginName}\` Options Error
+\`maxDepth\` cannot less than or equal to \`minDepth\`.
+
 Current values:
 - \`minDepth\`: ${options.minDepth}
 - \`maxDepth\`: ${options.maxDepth}`);
