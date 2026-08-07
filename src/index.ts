@@ -2,6 +2,7 @@ import type { PluginOption } from "vite";
 import type { SiteConfig, UserConfig, DefaultTheme } from "vitepress";
 import { clamp } from "./composables/math.js";
 import type { OutlineDepthPluginOptions, AvailableDepthValue } from "./types.js";
+export type { OutlineDepthPluginOptions, AvailableDepthValue };
 
 const componentName = "OutlineDepthToggle";
 const componentFile = `${componentName}.vue`;
