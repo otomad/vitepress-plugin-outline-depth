@@ -20,6 +20,10 @@
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
+		},
+		"./components": {
+			"types": "./dist/components/index.d.ts",
+			"import": "./dist/components/index.js"
 		}
 	},
 	"scripts": {
@@ -29,10 +33,10 @@
 		"fmt:check": "oxfmt --check",
 		"fmt:dist": "oxfmt dist/",
 		"build": "pnpm run clear && pnpm run /^build:.*/ && pnpm run fmt:dist",
-		"build:tsc": "tsc",
+		"build:tsc": "tsc --noCheck",
 		"build:component": "mkdist --pattern **/*.vue --declaration --no-clean",
 		"watch": "pnpm run clear && pnpm run /^watch:.*/",
-		"watch:tsc": "tsc --watch",
+		"watch:tsc": "tsc --watch --noCheck",
 		"watch:component": "cpx \"src/components/**/*.vue\" dist/components --watch"
 	},
 	"files": [

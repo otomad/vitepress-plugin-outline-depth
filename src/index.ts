@@ -10,7 +10,7 @@ const aliasComponentFile = `${import.meta.dirname}/components/${componentFile}`;
 const pluginName = "vitepress-plugin-outline-depth";
 const virtualModuleId = `virtual:${pluginName}/plugin-options`;
 const resolvedVirtualModuleId = `\0${virtualModuleId}`;
-const virtualAliasComponentId = `virtual:${pluginName}/${componentFile}`;
+const aliasComponentId = `${pluginName}/${componentFile}`;
 
 const slots = ["aside-outline-before"];
 
@@ -42,7 +42,7 @@ Current values:
 			return {
 				resolve: {
 					alias: {
-						[virtualAliasComponentId]: aliasComponentFile,
+						[aliasComponentId]: aliasComponentFile,
 					},
 				},
 			};
@@ -79,7 +79,7 @@ Current values:
 				const setupPosition = '<script setup lang="ts">';
 				transformResult = transformResult.replace(
 					setupPosition,
-					`${setupPosition}\nimport ${componentName} from '${virtualAliasComponentId}'`,
+					`${setupPosition}\nimport ${componentName} from '${aliasComponentId}'`,
 				);
 				return transformResult;
 			}
