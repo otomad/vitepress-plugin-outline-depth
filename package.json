@@ -1,6 +1,6 @@
 {
 	"name": "vitepress-plugin-outline-depth",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "VitePress plugin that controls the heading level depth of the sidebar (outline / table of contents)",
 	"homepage": "https://github.com/otomad/vitepress-plugin-outline-depth#readme",
 	"bugs": {
