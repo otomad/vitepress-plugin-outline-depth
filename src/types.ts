@@ -16,31 +16,7 @@ export interface OutlineDepthPluginOptions {
 	/**
 	 * Localize the labels.
 	 */
-	locales?: Record<
-		string,
-		{
-			/**
-			 * Specify the localized label text for the Outline Depth.
-			 *
-			 * @default
-			 * ```markdown
-			 * - en: Outline depth
-			 * - zh: 目录层级
-			 * ```
-			 */
-			depth: string;
-			/**
-			 * Specify the localized label text for the Auto Expand.
-			 *
-			 * @default
-			 * ```markdown
-			 * - en: Auto expand
-			 * - zh: 自动展开
-			 * ```
-			 */
-			autoExpand: string;
-		}
-	>;
+	locales?: OutlineDepthPluginLocalesOptions;
 	/**
 	 * Save the config to local storage?
 	 *
@@ -78,6 +54,31 @@ export interface OutlineDepthPluginOptions {
 	 * @default true
 	 */
 	setConfigOutlineLevelToDeep?: boolean;
+}
+
+export interface OutlineDepthPluginLocalesOptions {
+	[locale: string]: {
+		/**
+		 * Specify the localized label text for the Outline Depth.
+		 *
+		 * @default
+		 * ```markdown
+		 * - en: Outline depth
+		 * - zh: 目录层级
+		 * ```
+		 */
+		depth: string;
+		/**
+		 * Specify the localized label text for the Auto Expand.
+		 *
+		 * @default
+		 * ```markdown
+		 * - en: Auto expand
+		 * - zh: 自动展开
+		 * ```
+		 */
+		autoExpand: string;
+	}
 }
 
 export interface OutlineDepthLocalStorageConfigs {

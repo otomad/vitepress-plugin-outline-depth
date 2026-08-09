@@ -1,17 +1,11 @@
 import { useData } from "vitepress";
 import { computed } from "vue";
 import options from "virtual:vitepress-plugin-outline-depth/plugin-options";
-import type { OutlineDepthPluginOptions } from "../types.js";
+import defaultLocales from "./locales_default.js";
+import type { OutlineDepthPluginLocalesOptions } from "../types.js";
 
-const locales: NonNullable<OutlineDepthPluginOptions["locales"]> = {
-	en: {
-		depth: "Outline depth",
-		autoExpand: "Auto expand",
-	},
-	zh: {
-		depth: "目录层级",
-		autoExpand: "自动展开",
-	},
+const locales: OutlineDepthPluginLocalesOptions = {
+	...defaultLocales,
 	...options.locales,
 };
 
