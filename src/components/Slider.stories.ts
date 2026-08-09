@@ -5,7 +5,14 @@ import Slider from "./Slider.vue";
 const meta = {
 	component: Slider,
 	argTypes: {
-		step: { control: { type: "number", min: 1 } },
+		modelValue: { control: "number", description: "Value", table: { category: "models" } },
+		min: { description: "Minimum value" },
+		max: { description: "Maximum value" },
+		step: {
+			control: { type: "number", min: 1 },
+			description: "Step",
+			table: { defaultValue: { summary: "undefined" } },
+		},
 	},
 } satisfies Meta<typeof Slider>;
 
@@ -29,5 +36,6 @@ export const Primary: Story = {
 		min: 0,
 		max: 100,
 		step: undefined,
+		modelValue: 0,
 	},
 };

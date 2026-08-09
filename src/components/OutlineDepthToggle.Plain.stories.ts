@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 
 import OutlineDepthToggle from "./OutlineDepthToggle.Plain.vue";
 
+import defaultLocales from "../composables/locales_default.js";
+
 const hideArg = { table: { disable: true } } as const;
 const depthValues = { type: "range", min: 2, max: 6, step: 1 } as const;
 
@@ -10,13 +12,39 @@ const meta = {
 	argTypes: {
 		defaultDepth: hideArg,
 		defaultAutoExpand: hideArg,
-		depth: { control: depthValues },
-		minDepth: { control: depthValues },
-		maxDepth: { control: depthValues },
-		autoExpand: { control: "boolean" },
+		depth: {
+			control: depthValues,
+			description: "Outline depth",
+			table: { category: "models", defaultValue: { summary: "2" } },
+		},
+		minDepth: {
+			control: depthValues,
+			description: "Minimum outline depth",
+			table: { defaultValue: { summary: "2" } },
+		},
+		maxDepth: {
+			control: depthValues,
+			description: "Maximum outline depth",
+			table: { defaultValue: { summary: "6" } },
+		},
+		autoExpand: {
+			control: "boolean",
+			description: "Auto expand",
+			table: { category: "models", defaultValue: { summary: "true" } },
+		},
 		locales: hideArg,
-		depthLabel: { control: "text" },
-		autoExpandLabel: { control: "text" },
+		depthLabel: {
+			control: "text",
+			name: "locales.depth",
+			description: `${defaultLocales.en.depth} label`,
+			table: { category: "props", defaultValue: { summary: defaultLocales.en.depth } },
+		},
+		autoExpandLabel: {
+			control: "text",
+			name: "locales.autoExpand",
+			description: `${defaultLocales.en.autoExpand} label`,
+			table: { category: "props", defaultValue: { summary: defaultLocales.en.autoExpand } },
+		},
 	},
 } satisfies Meta<typeof OutlineDepthToggle & any>;
 

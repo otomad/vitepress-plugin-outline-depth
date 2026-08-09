@@ -5,7 +5,7 @@ import Switch from "./Switch.vue";
 const meta = {
 	component: Switch,
 	argTypes: {
-		modelValue: { control: "boolean" },
+		modelValue: { control: "boolean", description: "On", table: { category: "models" } },
 	},
 } satisfies Meta<typeof Switch>;
 
@@ -18,15 +18,14 @@ type Story = StoryObj<typeof meta>;
  * to learn how to use render functions.
  */
 export const Primary: Story = {
-    args: {
-        modelValue: false
-    },
-
-    render: args => ({
+	render: args => ({
 		components: { Switch },
 		setup() {
 			return { args };
 		},
 		template: '<Switch v-bind="args" />',
-	})
+	}),
+	args: {
+		modelValue: false,
+	},
 };
