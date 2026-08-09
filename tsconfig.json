@@ -114,5 +114,7 @@
 		"dist/**/*",
 		"**/*.test.ts",
 		"**/*.spec.ts",
+		"**/*.config.ts",
+		"**/*.stories.ts",
 	]
 }
