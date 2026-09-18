@@ -78,6 +78,7 @@
 		"auto-expand"
 	],
 	"dependencies": {
+		"@sugarat/theme-shared": "^0.1.0",
 		"smooth-value": "^1.1.0"
 	}
 }

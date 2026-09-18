@@ -1,3 +1,4 @@
+import { createSlotInjectPlugin } from "@sugarat/theme-shared";
 import type { PluginOption } from "vite";
 import type { SiteConfig, UserConfig, DefaultTheme } from "vitepress";
 import { clamp } from "./composables/math.js";
@@ -37,6 +38,7 @@ Current values:
 	let resolvedConfig: unknown;
 
 	return {
+		...createSlotInjectPlugin(componentName, slots, { importFrom: aliasComponentId }),
 		name: pluginName,
 		enforce: "pre",
 		config: () => {
@@ -65,25 +67,6 @@ Current values:
 			setOutlineLevelToDeep(userConfig);
 			if (userConfig.locales)
 				for (const localeConfig of Object.values(userConfig.locales)) setOutlineLevelToDeep(localeConfig);
-		},
-		transform(code, id) {
-			// Inject into standard VitePress Default Theme Layout.
-			if (id.endsWith("vitepress/dist/client/theme-default/Layout.vue")) {
-				let transformResult = code;
-
-				for (const element of slots) {
-					const slotPosition = `<slot name="${element}" />`;
-					// Append component after the slot
-					transformResult = transformResult.replace(slotPosition, `${slotPosition}<${componentName} />`);
-				}
-
-				const setupPosition = '<script setup lang="ts">';
-				transformResult = transformResult.replace(
-					setupPosition,
-					`${setupPosition}\nimport ${componentName} from '${aliasComponentId}'`,
-				);
-				return transformResult;
-			}
 		},
 		resolveId(id: string) {
 			if (id === virtualModuleId) {
