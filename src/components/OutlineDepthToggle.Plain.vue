@@ -65,12 +65,12 @@
 		if (!ul || ul.childElementCount > 0) return;
 		outlineItemsLoading.value = true;
 		let observer: MutationObserver;
-		new Promise<void>((resolve, reject) => {
+		new Promise<void>(resolve => {
 			observer = new MutationObserver(([mutation]) => {
 				if ((mutation.target as HTMLUListElement).childElementCount > 0) resolve();
 			});
 			observer.observe(ul, { childList: true });
-			onUnmounted(() => reject());
+			onUnmounted(() => resolve());
 		}).finally(() => {
 			outlineItemsLoading.value = false;
 			notFirstTimeOutlineItemsLoading = true;
