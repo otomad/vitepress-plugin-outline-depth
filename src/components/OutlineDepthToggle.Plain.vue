@@ -1,10 +1,12 @@
+<script lang="ts">
+	let notFirstTimeOutlineItemsLoading = false;
+</script>
+
 <script setup lang="ts">
 	import { ref, useId, onMounted, onUnmounted } from "vue";
 
 	import defaultLocales from "../composables/locales_default.js";
 	import type { OutlineDepthPluginOptions, OutlineDepthPluginLocalesOptions, AvailableDepthValue } from "../types.js";
-
-	import ClientOnly from "./ClientOnly.js";
 
 	import Slider from "./Slider.vue";
 	import VPSwitch from "./Switch.vue";
@@ -33,33 +35,55 @@
 	});
 
 	const id = useId();
-
-	const outlineMarker = ref<HTMLDivElement>();
-	const observer = ref<MutationObserver>();
+	const outlineItemsLoading = ref(false);
 
 	function focusForElementByLabel(e: Event) {
 		const label = e.currentTarget as HTMLLabelElement;
 		document.getElementById(label.htmlFor)?.focus();
 	}
 
+	// Scroll active outline link into view.
 	onMounted(() => {
 		if (!props.scrollActiveOutlineLinkIntoView) return;
-		outlineMarker.value = document.querySelector<HTMLDivElement>(".outline-marker")!;
-		observer.value = new MutationObserver(([mutation]) => {
+		const outlineMarker = document.querySelector<HTMLDivElement>(".outline-marker")!;
+		const observer = new MutationObserver(([mutation]) => {
 			if (mutation.type === "attributes" && mutation.attributeName === "style") {
-				outlineMarker.value?.scrollIntoView({ behavior: "smooth", block: "center", container: "nearest" });
+				outlineMarker?.scrollIntoView({ behavior: "smooth", block: "center", container: "nearest" });
 			}
 		});
-		observer.value.observe(outlineMarker.value, { attributes: true });
+		observer.observe(outlineMarker, { attributes: true });
+
+		onUnmounted(() => {
+			observer.disconnect();
+		});
 	});
 
-	onUnmounted(() => {
-		observer.value?.disconnect();
+	// Disable starting style on page loaded.
+	onMounted(() => {
+		if (notFirstTimeOutlineItemsLoading) return;
+		const ul = document.querySelector<HTMLUListElement>(".VPDocOutlineItem.root");
+		if (!ul || ul.childElementCount > 0) return;
+		outlineItemsLoading.value = true;
+		let observer: MutationObserver;
+		new Promise<void>((resolve, reject) => {
+			observer = new MutationObserver(([mutation]) => {
+				if ((mutation.target as HTMLUListElement).childElementCount > 0) resolve();
+			});
+			observer.observe(ul, { childList: true });
+			onUnmounted(() => reject());
+		}).finally(() => {
+			outlineItemsLoading.value = false;
+			notFirstTimeOutlineItemsLoading = true;
+			observer?.disconnect();
+		});
 	});
 </script>
 
 <template>
-	<div class="outline-depth-toggle" :class="{ stick: props.stickAtTop }">
+	<div
+		class="outline-depth-toggle"
+		:class="{ stick: props.stickAtTop, 'outline-items-loading': outlineItemsLoading }"
+	>
 		<div class="content">
 			<label :for="`${id}-depth`" @click="focusForElementByLabel">{{ locales.depth }}</label>
 			<div class="slider-wrapper">
@@ -71,11 +95,6 @@
 			</label>
 		</div>
 	</div>
-	<ClientOnly>
-		<template #fallback>
-			<var class="is-loading" hidden aria-hidden />
-		</template>
-	</ClientOnly>
 </template>
 
 <style scoped>
@@ -152,7 +171,7 @@
 		}
 
 		:active-view-transition &,
-		.is-loading ~ .VPDocAsideOutline & {
+		.outline-items-loading ~ .VPDocAsideOutline & {
 			transition: none;
 		}
 	}
