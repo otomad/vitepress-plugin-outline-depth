@@ -4,12 +4,15 @@
 	import defaultLocales from "../composables/locales_default.js";
 	import type { OutlineDepthPluginOptions, OutlineDepthPluginLocalesOptions, AvailableDepthValue } from "../types.js";
 
+	import ClientOnly from "./ClientOnly.js";
+
 	import Slider from "./Slider.vue";
 	import VPSwitch from "./Switch.vue";
 
 	const props = withDefaults(
 		defineProps<
-			Omit<OutlineDepthPluginOptions, "locales" | "saveToLocalStorage"> & {
+			// Ignore props: "saveToLocalStorage"
+			Omit<OutlineDepthPluginOptions, "locales"> & {
 				locales: OutlineDepthPluginLocalesOptions[string];
 			}
 		>(),
@@ -68,6 +71,11 @@
 			</label>
 		</div>
 	</div>
+	<ClientOnly>
+		<template #fallback>
+			<var class="is-loading" hidden aria-hidden />
+		</template>
+	</ClientOnly>
 </template>
 
 <style scoped>
@@ -143,13 +151,14 @@
 			block-size: 0;
 		}
 
-		:active-view-transition & {
+		:active-view-transition &,
+		.is-loading ~ .VPDocAsideOutline & {
 			transition: none;
 		}
 	}
 
 	/*
-	 * 原计划直接写 `@container style(--outline-depth < 6)` 等，但截至目前（2026年）只有 Chromium，而且 LightningCSS 编译时还会报错。参见：
+	 * 原计划直接写 `@container style(--outline-depth < 6)` 等，但截至目前（2026年）只有 Chromium 支持，而且 LightningCSS 编译时还会报错。参见：
 	 * https://caniuse.com/wf-style-query-range-syntax
 	 * https://github.com/parcel-bundler/lightningcss/issues/1069
 	 */
