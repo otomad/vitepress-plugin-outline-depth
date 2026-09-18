@@ -105,7 +105,7 @@
 		.content {
 			display: grid;
 			grid-template-columns: auto 1fr;
-			gap: 8px 6.4px;
+			gap: 8px 0;
 			align-items: center;
 			padding-block: 4px;
 			padding-inline: 16px 0;
@@ -147,6 +147,10 @@
 		white-space: nowrap;
 		font-size: 0.875rem;
 		color: var(--vp-c-text-2);
+
+		&[for] {
+			padding-inline-end: 6.4px;
+		}
 	}
 
 	.VPSwitch {
