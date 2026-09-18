@@ -35,8 +35,6 @@ Current values:
 - \`maxDepth\`: ${options.maxDepth}`);
 	options.defaultDepth = clamp(options.defaultDepth, options.minDepth, options.maxDepth) as AvailableDepthValue;
 
-	let resolvedConfig: unknown;
-
 	return {
 		...createSlotInjectPlugin(componentName, slots, { importFrom: aliasComponentId }),
 		name: pluginName,
@@ -52,21 +50,27 @@ Current values:
 		},
 		async configResolved(_config) {
 			const config = _config as typeof _config & { vitepress: SiteConfig<DefaultTheme.Config> };
-			if (resolvedConfig || !options.setConfigOutlineLevelToDeep) return;
-			resolvedConfig = config;
-			const userConfig = config.vitepress.userConfig as UserConfig<DefaultTheme.Config>;
-
-			function setOutlineLevelToDeep(config: { themeConfig?: DefaultTheme.Config }) {
-				config.themeConfig ??= {};
-				const outlineConfig = config.themeConfig.outline;
-				if (outlineConfig && typeof outlineConfig === "object" && !Array.isArray(outlineConfig))
-					outlineConfig.level = "deep";
-				else config.themeConfig.outline = { level: "deep" };
+			// Prevent the error when building in SSR mode after importing "./components".
+			if ((config.ssr.noExternal ??= []) !== true) {
+				if (!Array.isArray(config.ssr.noExternal)) config.ssr.noExternal = [config.ssr.noExternal];
+				pushUniquely(config.ssr.noExternal, pluginName);
 			}
 
-			setOutlineLevelToDeep(userConfig);
-			if (userConfig.locales)
-				for (const localeConfig of Object.values(userConfig.locales)) setOutlineLevelToDeep(localeConfig);
+			if (options.setConfigOutlineLevelToDeep) {
+				const userConfig = config.vitepress.userConfig as UserConfig<DefaultTheme.Config>;
+
+				function setOutlineLevelToDeep(config: { themeConfig?: DefaultTheme.Config }) {
+					config.themeConfig ??= {};
+					const outlineConfig = config.themeConfig.outline;
+					if (outlineConfig && typeof outlineConfig === "object" && !Array.isArray(outlineConfig))
+						outlineConfig.level = "deep";
+					else config.themeConfig.outline = { level: "deep" };
+				}
+
+				setOutlineLevelToDeep(userConfig);
+				if (userConfig.locales)
+					for (const localeConfig of Object.values(userConfig.locales)) setOutlineLevelToDeep(localeConfig);
+			}
 		},
 		resolveId(id: string) {
 			if (id === virtualModuleId) {
@@ -79,4 +83,8 @@ Current values:
 			}
 		},
 	};
+}
+
+function pushUniquely<T>(array: T[], item: T) {
+	if (!array.includes(item)) array.push(item);
 }
