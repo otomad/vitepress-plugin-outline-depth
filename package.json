@@ -19,11 +19,13 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"import": "./dist/index.js",
+			"module-sync": "./dist/index.js"
 		},
 		"./components": {
 			"types": "./dist/components/index.d.ts",
-			"import": "./dist/components/index.js"
+			"import": "./dist/components/index.js",
+			"module-sync": "./dist/components/index.js"
 		}
 	},
 	"scripts": {
